@@ -1,0 +1,17 @@
+[
+  {
+    "id": "black-render",
+    "prompt": "QA this HyperFrames MP4. It rendered successfully, but I think it might be black.",
+    "expected": "Runs video_probe and extract_frames, identifies black/static risk if sampled frames are blank, and produces video-qa-report.md plus a contact sheet."
+  },
+  {
+    "id": "delivery-check",
+    "prompt": "Before I send this 30 second render to someone, verify duration, fps, resolution, and visual evidence.",
+    "expected": "Compares ffprobe metadata and sampled frames against requested specs, then reports pass/fail with concrete file evidence."
+  },
+  {
+    "id": "hyperframes-output",
+    "prompt": "The HyperFrames project passed lint, validate, and inspect. Check the final MP4 itself.",
+    "expected": "Treats HyperFrames checks as useful but insufficient, probes the MP4, extracts frames, and reports remaining risks."
+  }
+]

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Video QA"
+  short_description: "Inspect rendered videos for technical and visual delivery risks."
+  default_prompt: "QA this rendered video and produce a report."

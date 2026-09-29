@@ -1,3 +1,3 @@
 # Security
 
-Report credential, privacy, unsafe-execution, or supply-chain concerns privately through GitHub security reporting. Do not post live secrets or personal records in public issues.
+Open a public issue to request a private contact. Do not include vulnerability details, credentials, or personal records in the issue. Share sensitive details only after agreeing on a private channel with the maintainer.

@@ -107,12 +107,18 @@ def classify_video(metadata, frame_stats):
 
     black_frame_risk = black_ratio >= 0.8
     white_frame_risk = white_ratio >= 0.8
+    sampled_changes = [float(stat["mean_abs_change"]) for stat in frame_stats if "mean_abs_change" in stat]
+    mostly_changing = bool(sampled_changes) and sum(change > 1.0 for change in sampled_changes) > len(sampled_changes) / 2
     static_frame_risk = (
         len(frame_stats) >= 3
         and not black_frame_risk
         and not white_frame_risk
         and mean_range <= STATIC_MEAN_RANGE_THRESHOLD
         and stdev_range <= STATIC_STDEV_RANGE_THRESHOLD
+        # Similar brightness distributions can belong to visibly moving frames.
+        # When sampled pixel differences are available, retain a static warning
+        # only when those samples also show very little spatial change.
+        and not mostly_changing
     )
 
     if black_frame_risk or white_frame_risk:
@@ -183,6 +189,7 @@ def sample_frame_stats(video_path, metadata, ffmpeg="ffmpeg", count=5):
         raise ValueError("Video width and height must be positive for frame sampling.")
     expected_bytes = width * height * 3
     stats = []
+    previous_raw = None
     for timestamp in sample_timestamps(metadata["duration"], count=count):
         command = [
             ffmpeg,
@@ -208,6 +215,17 @@ def sample_frame_stats(video_path, metadata, ffmpeg="ffmpeg", count=5):
                 f"({len(raw)} of {expected_bytes} bytes)"
             )
         stat = _frame_bytes_to_stats(raw)
+        if previous_raw is not None:
+            # Bound this comparison to about 100,000 RGB pixels per frame.
+            step = max(1, expected_bytes // 300000) * 3
+            stat["mean_abs_change"] = round(
+                statistics.fmean(
+                    abs(raw[index + channel] - previous_raw[index + channel])
+                    for index in range(0, expected_bytes, step)
+                    for channel in range(3)
+                ), 3
+            )
+        previous_raw = raw
         stat["timestamp"] = timestamp
         stats.append(stat)
     return stats

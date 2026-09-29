@@ -1,4 +1,4 @@
 interface:
   display_name: "Video QA"
-  short_description: "Inspect rendered videos for technical and visual delivery risks."
-  default_prompt: "QA this rendered video and produce a report."
+  short_description: "Inspect actual rendered video and affected timings"
+  default_prompt: "Use $video-qa to inspect actual rendered video and affected timings. Follow the requested scope and load only relevant references."

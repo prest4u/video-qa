@@ -21,6 +21,34 @@ from video_probe import classify_video, exit_code_for_severity, main, parse_ffpr
 
 
 class VideoProbeTests(unittest.TestCase):
+    def test_moving_pixels_with_the_same_histogram_are_not_static(self):
+        metadata = {"duration": 3.0, "width": 2, "height": 1, "fps": 24.0}
+        # The red channel stays fixed; green/blue exchange spatial positions.
+        first = bytes([100, 0, 255, 100, 255, 0])
+        second = bytes([100, 255, 0, 100, 0, 255])
+        outputs = [subprocess.CompletedProcess([], 0, stdout=value) for value in (first, second, first)]
+        with mock.patch("video_probe.subprocess.run", side_effect=outputs):
+            frames = sample_frame_stats("moving.mp4", metadata, count=3)
+        self.assertEqual(len({frame["mean"] for frame in frames}), 1)
+        self.assertGreater(frames[1]["mean_abs_change"], 100)
+        self.assertFalse(classify_video(metadata, frames)["risks"]["static_frame_risk"])
+
+    def test_identical_pixels_keep_the_static_warning(self):
+        metadata = {"duration": 3.0, "width": 2, "height": 1, "fps": 24.0}
+        raw = bytes([100, 0, 255, 100, 255, 0])
+        with mock.patch("video_probe.subprocess.run", return_value=subprocess.CompletedProcess([], 0, stdout=raw)):
+            frames = sample_frame_stats("still.mp4", metadata, count=3)
+        self.assertEqual(frames[1]["mean_abs_change"], 0)
+        self.assertTrue(classify_video(metadata, frames)["risks"]["static_frame_risk"])
+
+    def test_one_changed_sample_does_not_clear_a_mostly_frozen_video(self):
+        metadata = {"duration": 10.0, "width": 2, "height": 1, "fps": 24.0}
+        frames = [{"mean": 128.0, "stdev": 50.0}]
+        frames.extend({"mean": 128.0, "stdev": 50.0, "mean_abs_change": change} for change in [0, 0, 100, 0])
+        result = classify_video(metadata, frames)
+        self.assertTrue(result["risks"]["static_frame_risk"])
+        self.assertEqual(result["severity"], "P1")
+
     def test_parse_ffprobe_json_extracts_core_metadata(self):
         payload = {
             "streams": [

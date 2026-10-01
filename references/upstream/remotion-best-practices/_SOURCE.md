@@ -2,6 +2,6 @@
 
 - Repository: https://github.com/remotion-dev/codex-plugin.git
 - Source path: `skills/remotion-best-practices`
-- Commit: `2ebf4be1d38f0fdfab56490354ce540882c8d856`
+- Commit: `d91434e50de129121960ae70b91c971539e73e91`
 - License: MIT
 - Update policy: replace this directory only through `scripts/sync_upstreams.py`.

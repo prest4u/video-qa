@@ -2,6 +2,6 @@
 
 - Repository: https://github.com/remotion-dev/codex-plugin.git
 - Source path: `skills/remotion-render`
-- Commit: `8334b5a97387f37989b2e8ce7c83f96132d204c2`
+- Commit: `1c296933ee8989444d1e0d4df37ba5283976b7c1`
 - License: MIT
 - Update policy: replace this directory only through `scripts/sync_upstreams.py`.
